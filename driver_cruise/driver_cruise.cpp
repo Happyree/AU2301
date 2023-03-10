@@ -232,7 +232,7 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 	\*▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*/
 	double targetAngleError = 0.0; //目标误差
 	double currentAngleError = atan2(_midline[5][0], _midline[5][1]); //当前误差
-	double kp = 0.0, kp2 = 0.0, ki = 0.0, kd = 0.0;
+	double kp = 0.0, kp2 = 0.0, ki = 0.0, ki2 = 0.0,kd = 0.0,kd2=0.0;
 
 	//计算前方是直道还是弯道
 	circle myCurve;
@@ -240,7 +240,7 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 	int delta2 = constrain(10, 35, (_speed + 60) / 10);
 	if (!isCementRoad)
 	{
-		for (int fStep = 0; fStep < 40; fStep++)
+		for (int fStep = 0; fStep < 15+_speed/5; fStep++)
 		{
 			myCurve = getR(_midline[fStep][0], _midline[fStep][1], _midline[fStep + 10][0], _midline[fStep + 10][1], _midline[fStep + 20][0], _midline[fStep + 20][1]);
 			if (myCurve.r < minCruve)
@@ -251,7 +251,7 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 	}
 	else
 	{
-		for (int fStep = 0; fStep < 50; fStep++)
+		for (int fStep = 0; fStep < 15 + _speed / 5; fStep++)
 		{
 			myCurve = getR(_midline[fStep][0], _midline[fStep][1], _midline[fStep + 10][0], _midline[fStep + 10][1], _midline[fStep + 20][0], _midline[fStep + 20][1]);
 			if (myCurve.r < minCruve)
@@ -271,47 +271,59 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 
 	if (minCruve > 450)
 	{
-		kp = 0.35;
-		ki = 0.01;
-		kd = 5;
-		kp2 = 0.1;
+		kp = 2;
+		ki = 0;
+		kd = 2;
+		kp2 = 3;
+		ki2 = 0;
+		kd2 = 12;
 	}
 	else if (minCruve > 250)
 	{
-		kp = 0.5;
-		ki = 0.01;
+		kp = 3;
+		ki = 0;
 		kd = 5;
-		kp2 = 0.1;
+		kp2 = 3;
+		ki2 = 0;
+		kd2 = 12;
 	}
 	else if (minCruve > 120)
 	{
-		kp = 0.7;
-		ki = 0.01;
-		kd = 5;
-		kp2 = 0.2;
+		kp = 5;
+		ki = 0;
+		kd = 20;
+		kp2 = 5;
+		ki2 = 0;
+		kd2 = 20;
 	}
 	else if (minCruve > 40)
 	{
-		kp = 0.95;
-		ki = 0.01;
-		kd = 5;
-		kp2 = 0.5;
+		kp = 7;
+		ki = 0;
+		kd = 25;
+		kp2 = 7;
+		ki2 = 0;
+		kd2 = 25;
 	}
 	else
 	{
-		kp= 1.15;
-		ki = 0.01;
-		kd = 5;
-		kp2 = 0.5;
+		kp= 8;
+		ki = 0;
+		kd = 25;
+		kp2 = 8;
+		ki2 = 0;
+		kd2 = 25;
 	}
 
-	angleController.initialkp_ki_kd(kp, ki, kd);
+	
 	if (isCementRoad)
 	{
+		angleController.initialkp_ki_kd(kp, ki, kd);
 		offsetController.initialkp_ki_kd(8.0, 0.01, 9.0);
 	}
 	else
 	{
+		angleController.initialkp_ki_kd(kp2, ki2, kd2);
 		offsetController.initialkp_ki_kd(12.5, 0.01, 11.0);
 	}
 
@@ -369,7 +381,7 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 	//每当目标速度变化时初始化PID控制器，重设参数，清空积分器和微分器
 	if (targetSpeed != lastTargetSpeed)
 	{
-		speedController.initial(0.01, 0.5, 0.1, targetSpeed);
+		speedController.initial(0.01, 0.5, 2, targetSpeed);
 		lastTargetSpeed = targetSpeed;
 	}
 
