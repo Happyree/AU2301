@@ -381,7 +381,7 @@ static void userDriverSetParam(float* cmdAcc, float* cmdBrake, float* cmdSteer, 
 	//每当目标速度变化时初始化PID控制器，重设参数，清空积分器和微分器
 	if (targetSpeed != lastTargetSpeed)
 	{
-		speedController.initial(0.01, 0.5, 2, targetSpeed);
+		speedController.initial(0.01, 0.5, 0.1, targetSpeed);
 		lastTargetSpeed = targetSpeed;
 	}
 
